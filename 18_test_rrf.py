@@ -243,3 +243,28 @@ evaluation_results_multiple_top_k.to_csv("reranked_retrieval_evaluation.csv", in
 
 print("\n✅ Reranking evaluation complete. Results saved to reranked_retrieval_evaluation.csv.")
 
+
+
+def compute_accuracy(df, top_k_values=[5, 10, 25]):
+    """Compute accuracy for each top_k value."""
+    accuracy_results = {}
+
+    for top_k in top_k_values:
+        match_column = f"Match Found (Top {top_k})"
+        accuracy = df[match_column].mean()  # Mean gives proportion of True values
+        accuracy_results[f"Accuracy (Top {top_k})"] = accuracy
+
+    return accuracy_results
+
+# Compute accuracy for each top_k
+accuracy_scores = compute_accuracy(evaluation_results_multiple_top_k)
+
+# Convert to DataFrame for display and saving
+df_accuracy = pd.DataFrame([accuracy_scores])
+
+# Save accuracy results to CSV
+df_accuracy.to_csv("cohere_reranking_accuracy_scores.csv", index=False)
+
+# Print accuracy results
+print("\n✅ Accuracy Results:")
+print(df_accuracy.to_string(index=False))
