@@ -7,3 +7,4 @@ openai
 aiohttp
 ipywidgets
 ipykernel
+cohere

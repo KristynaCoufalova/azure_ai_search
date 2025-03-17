@@ -7437,3 +7437,43 @@ Execution 2:
 2025-03-07 14:33:00,295 - INFO -   Items Processed: 1
 2025-03-07 14:33:00,295 - INFO -   Items Failed: 0
 2025-03-07 14:33:00,295 - WARNING -   Warnings: [<azure.search.documents.indexes._generated.models._models_py3.SearchIndexerWarning object at 0x1017881c0>]
+2025-03-17 08:53:48,784 - INFO - Request URL: 'https://mf-search.search.windows.net/indexers('test10-index-indexer')/search.status?api-version=REDACTED'
+Request method: 'GET'
+Request headers:
+    'api-key': 'REDACTED'
+    'Accept': 'application/json;odata.metadata=minimal'
+    'x-ms-client-request-id': 'f5d875e0-0304-11f0-b191-068e18b93ae8'
+    'User-Agent': 'azsdk-python-search-documents/11.5.2 Python/3.11.0 (macOS-14.5-arm64-arm-64bit)'
+No body was attached to the request
+2025-03-17 08:53:48,976 - INFO - Response status: 200
+Response headers:
+    'Transfer-Encoding': 'chunked'
+    'Content-Type': 'application/json; odata.metadata=minimal; odata.streaming=true; charset=utf-8'
+    'Content-Encoding': 'REDACTED'
+    'Vary': 'REDACTED'
+    'Server': 'Microsoft-IIS/10.0'
+    'Strict-Transport-Security': 'REDACTED'
+    'Preference-Applied': 'REDACTED'
+    'OData-Version': 'REDACTED'
+    'request-id': 'f5d875e0-0304-11f0-b191-068e18b93ae8'
+    'elapsed-time': 'REDACTED'
+    'Date': 'Mon, 17 Mar 2025 07:53:48 GMT'
+2025-03-17 08:53:48,980 - INFO - Indexer Name: test10-index-indexer
+2025-03-17 08:53:48,980 - INFO - Current Status: running
+2025-03-17 08:53:48,980 - INFO - Last Execution Result: success
+2025-03-17 08:53:48,980 - INFO - Execution History Count: 2
+2025-03-17 08:53:48,980 - INFO - 
+Execution 1:
+2025-03-17 08:53:48,980 - INFO -   Start Time: 2025-03-07 13:32:41.504000+00:00
+2025-03-17 08:53:48,980 - INFO -   End Time: 2025-03-07 13:32:41.837000+00:00
+2025-03-17 08:53:48,980 - INFO -   Status: success
+2025-03-17 08:53:48,980 - INFO -   Items Processed: 0
+2025-03-17 08:53:48,980 - INFO -   Items Failed: 0
+2025-03-17 08:53:48,980 - INFO - 
+Execution 2:
+2025-03-17 08:53:48,980 - INFO -   Start Time: 2025-03-07 13:31:21.366000+00:00
+2025-03-17 08:53:48,980 - INFO -   End Time: 2025-03-07 13:32:37.865000+00:00
+2025-03-17 08:53:48,980 - INFO -   Status: success
+2025-03-17 08:53:48,980 - INFO -   Items Processed: 1
+2025-03-17 08:53:48,980 - INFO -   Items Failed: 0
+2025-03-17 08:53:48,981 - WARNING -   Warnings: [<azure.search.documents.indexes._generated.models._models_py3.SearchIndexerWarning object at 0x103b53150>]
