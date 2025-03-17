@@ -96,18 +96,19 @@ data = [
 
 df_test = pd.DataFrame(data, columns=["Nr.", "Question", "Pages"])
 
+
 def get_embedding(query):
-    """Generate OpenAI embedding for the query with rate limiting."""
+    """Generate OpenAI embedding for the query."""
     try:
         response = openai_client.embeddings.create(
             model=AZURE_OPENAI_DEPLOYMENT,
             input=query
         )
-        time.sleep(6)  # Rate limiting: Wait 6 seconds before next API call
         return response.data[0].embedding
     except Exception as e:
-        print(f"❌ Error generating embedding for '{query}': {e}")
+        print(f" Error generating embedding for '{query}': {e}")
         return None
+
 
 def perform_search(query, embedding_vector, top_k):
     """Perform BM25 and Vector Search with rate limiting."""
@@ -125,8 +126,7 @@ def perform_search(query, embedding_vector, top_k):
     bm25_response = requests.post(url, headers=headers, json=bm25_body)
     bm25_results = bm25_response.json().get("value", []) if bm25_response.status_code == 200 else []
 
-    # Rate limiting
-    time.sleep(6)  # Ensure 10 API calls per minute
+ 
 
     # Vector Search
     vector_body = {
