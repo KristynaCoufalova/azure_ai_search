@@ -26,72 +26,19 @@ openai_client = AzureOpenAI(
     api_version="2024-02-01"
 )
 
-# Creating the dataframe with all the given data
-data = [
-    (0, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Prohlášení o přijatelnosti žadatele/partnera", "56"),
-    (1, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Prohlášení o přijatelnosti žadatele/partnera", "57"),
-    (2, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Prohlášení o přijatelnosti žadatele/partnera", "97"),
-    (3, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Prohlášení o přijatelnosti žadatele/partnera", "102"),
-    (4, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Doklad o obratu", "260"),
-    (5, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (6, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (7, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (8, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (9, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (10, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (11, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (12, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (13, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (14, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (15, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (16, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (17, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (18, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Doklad o typu a právní formě příjemce", "57"),
-    (19, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Prokázání vlastnické struktury", "57"),
-    (20, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Nepovinné přílohy dle výzvy", "260"),
-    (21, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (22, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (23, "Jaké datum je pro splnění indikátoru nejdůležitější?", "168"),
-    (24, "Jaká je lhůta pro předložení zprávy o realizaci?", "125"),
-    (25, "Může žadatel zahájit realizaci projektu před vydáním PA?", "126"),
-    (26, "Jak se dokládají paušální náklady?", "229"),
-    (27, "Musejí se u paušálních nákladů dokládat účetní doklady?", "229"),
-    (28, "V jaké fázi musí být stavební záměr před vydáním PA?", "97"),
-    (29, "Existuje vzor smlouvy o partnerství?", "114"),
-    (30, "Může příjemce fakturovat partnerovi služby realizované pro projekt?", "63"),
-    (31, "Jak je v projektu financován partner?", "62"),
-    (32, "Jak dlouho může probíhat realizace projektu?", "121"),
-    (33, "Je možné prodloužit realizaci projektu?", "124"),
-    (34, "Může příjemce nesouhlasit s řídicím orgánem ohledně administrativního ověření ŽoP?", "247"),
-    (35, "Jakou povinnou publicitu musí realizovat příjemce projektů?", "162"),
-    (36, "Je příjemce správcem nebo zpracovatelem osobních údajů v projektu?", "134"),
-    (37, "Jaké podmínky musí výzkumná organizace plnit při využití dotovaného vybavení?", "153"),
-    (38, "Jak určovat kategorii podniku pro veřejné vysoké školy?", "29"),
-    (39, "Kdy se nevyplňuje list Skupina podniků v příloze č. 6 PpŽP?", "59"),
-    (40, "Jaká je lhůta pro odeslání dokumentů požadovaných k vydání rozhodnutí?", "113"),
-    (41, "Co se stane pokud žadatel nedodá požadované podklady?", "113"),
-    (42, "Jakým způsobem musí být požadované dokumenty odeslány?", "113"),
-    (43, "Kdy je možné kombinovat ex-ante a ex-post platby na úrovni projektu?", "90"),
-    (44, "Na základě čeho je určen způsob financování projektů?", "90"),
-    (45, "Kdy se kontroluje střet zájmů?", "61"),
-    (46, "Co je datum dosažení indikátoru?", "169"),
-    (47, "Kdy se začínají předkládat ZoR?", "125"),
-    (48, "Jakou povinnou publicitu musí realizovat příjemce projektů?", "162"),
-    (49, "Jaké podmínky musí být plněny při využití vybavení podpořeného z dotace?", "153"),
-    (50, "Jakými způsoby je zajištěno financování projektů?", "93"),
-    (51, "Výčet podstatných změn zakládajících změnu právního aktu.", "142"),
-    (52, "Využívá příslušný OP některou z metod zjednodušeného vykazování výdajů?", "225"),
-    (53, "Jak se vypočte maximální počet jednotek vykázaných na zaměstnance?", "88"),
-    (54, "Existuje vzor partnerské smlouvy?", "63"),
-    (55, "Jaká je povinná publicita pro projekty nad 500 000 EUR?", "162"),
-    (56, "V jaké dokumentaci jsou pravidla pro zadávání veřejných zakázek?", "149"),
-    (57, "Kdy příjemce nemusí dodržovat postupy veřejných zakázek?", "164"),
-    (58, "Co je to jeden podnik?", "156"),
-    (59, "Kdy se začíná předkládat zpráva o realizaci projektu?", "125"),
-    (60, "Jak dlouho může probíhat realizace projektu?", "121")
-]
+# Read the dataframe from CSV file
+csv_file = "opjak_eval_pzp_250.csv"
+print(f"📊 Loading test data from {csv_file}...")
+try:
+    df_test = pd.read_csv(csv_file, sep=';')
+    print(f"✅ Successfully loaded {len(df_test)} rows from CSV")
+except Exception as e:
+    print(f"❌ Error loading CSV file: {e}")
+    exit(1)
 
-df_test = pd.DataFrame(data, columns=["Nr.", "Question", "Pages"])
+# Display sample of the loaded data
+print("\n📝 Sample of loaded data:")
+print(df_test.head())
 
 def get_embedding(query):
     """Generate OpenAI embedding for the query."""
@@ -171,7 +118,18 @@ def evaluate_results_with_multiple_top_k(df, top_k_values=[5, 10, 25]):
 
     for index, row in df.iterrows():
         query = row["Question"]
-        expected_pages = row["Pages"].split(", ")
+        
+        # Convert Pages to string and handle both float and string formats
+        if pd.isna(row["Pages"]):
+            continue  # Skip rows with missing Pages
+            
+        # Convert to string and handle both individual values and comma-separated values
+        page_str = str(row["Pages"]).strip()
+        if "," in page_str:
+            expected_pages = [p.strip() for p in page_str.split(",")]
+        else:
+            # Handle single numerical value (potentially with decimal point)
+            expected_pages = [str(int(float(page_str)))]  # Convert to int then back to str
 
         print(f"\n Query #{index+1}: {query}")
         print(f" Expected Pages: {expected_pages}")
@@ -209,6 +167,8 @@ def evaluate_results_with_multiple_top_k(df, top_k_values=[5, 10, 25]):
                     reranked_docs.append(doc_objects[result.index])
             
             retrieved_pages = [extract_page_number(doc["chunk_id"]) for doc in reranked_docs if doc.get("chunk_id")]
+            # Filter out None values
+            retrieved_pages = [page for page in retrieved_pages if page is not None]
             
             retrieved_pages_dict[f"Retrieved Pages (Top {top_k})"] = retrieved_pages
             match_results[f"Match Found (Top {top_k})"] = any(page in retrieved_pages for page in expected_pages)

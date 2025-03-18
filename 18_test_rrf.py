@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import cohere
 from openai import AzureOpenAI
 from collections import defaultdict
+import random
 
 # Load environment variables
 load_dotenv()
@@ -28,125 +29,131 @@ openai_client = AzureOpenAI(
     api_version="2024-02-01"
 )
 
-# Creating the dataframe with test queries
-# Creating the dataframe with all the given data
-data = [
-    (0, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Prohlášení o přijatelnosti žadatele/partnera", "56"),
-    (1, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Prohlášení o přijatelnosti žadatele/partnera", "57"),
-    (2, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Prohlášení o přijatelnosti žadatele/partnera", "97"),
-    (3, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Prohlášení o přijatelnosti žadatele/partnera", "102"),
-    (4, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Doklad o obratu", "260"),
-    (5, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (6, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (7, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (8, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (9, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (10, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (11, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (12, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (13, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (14, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (15, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (16, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (17, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (18, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Doklad o typu a právní formě příjemce", "57"),
-    (19, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Prokázání vlastnické struktury", "57"),
-    (20, "Jaké přílohy musí žadatel doložit s žádostí o podporu - Nepovinné přílohy dle výzvy", "260"),
-    (21, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (22, "Jaké dokumenty musí žadatel doložit před vydáním právního aktu o poskytnutí podpory (PA)", "113"),
-    (23, "Jaké datum je pro splnění indikátoru nejdůležitější?", "168"),
-    (24, "Jaká je lhůta pro předložení zprávy o realizaci?", "125"),
-    (25, "Může žadatel zahájit realizaci projektu před vydáním PA?", "126"),
-    (26, "Jak se dokládají paušální náklady?", "229"),
-    (27, "Musejí se u paušálních nákladů dokládat účetní doklady?", "229"),
-    (28, "V jaké fázi musí být stavební záměr před vydáním PA?", "97"),
-    (29, "Existuje vzor smlouvy o partnerství?", "114"),
-    (30, "Může příjemce fakturovat partnerovi služby realizované pro projekt?", "63"),
-    (31, "Jak je v projektu financován partner?", "62"),
-    (32, "Jak dlouho může probíhat realizace projektu?", "121"),
-    (33, "Je možné prodloužit realizaci projektu?", "124"),
-    (34, "Může příjemce nesouhlasit s řídicím orgánem ohledně administrativního ověření ŽoP?", "247"),
-    (35, "Jakou povinnou publicitu musí realizovat příjemce projektů?", "162"),
-    (36, "Je příjemce správcem nebo zpracovatelem osobních údajů v projektu?", "134"),
-    (37, "Jaké podmínky musí výzkumná organizace plnit při využití dotovaného vybavení?", "153"),
-    (38, "Jak určovat kategorii podniku pro veřejné vysoké školy?", "29"),
-    (39, "Kdy se nevyplňuje list Skupina podniků v příloze č. 6 PpŽP?", "59"),
-    (40, "Jaká je lhůta pro odeslání dokumentů požadovaných k vydání rozhodnutí?", "113"),
-    (41, "Co se stane pokud žadatel nedodá požadované podklady?", "113"),
-    (42, "Jakým způsobem musí být požadované dokumenty odeslány?", "113"),
-    (43, "Kdy je možné kombinovat ex-ante a ex-post platby na úrovni projektu?", "90"),
-    (44, "Na základě čeho je určen způsob financování projektů?", "90"),
-    (45, "Kdy se kontroluje střet zájmů?", "61"),
-    (46, "Co je datum dosažení indikátoru?", "169"),
-    (47, "Kdy se začínají předkládat ZoR?", "125"),
-    (48, "Jakou povinnou publicitu musí realizovat příjemce projektů?", "162"),
-    (49, "Jaké podmínky musí být plněny při využití vybavení podpořeného z dotace?", "153"),
-    (50, "Jakými způsoby je zajištěno financování projektů?", "93"),
-    (51, "Výčet podstatných změn zakládajících změnu právního aktu.", "142"),
-    (52, "Využívá příslušný OP některou z metod zjednodušeného vykazování výdajů?", "225"),
-    (53, "Jak se vypočte maximální počet jednotek vykázaných na zaměstnance?", "88"),
-    (54, "Existuje vzor partnerské smlouvy?", "63"),
-    (55, "Jaká je povinná publicita pro projekty nad 500 000 EUR?", "162"),
-    (56, "V jaké dokumentaci jsou pravidla pro zadávání veřejných zakázek?", "149"),
-    (57, "Kdy příjemce nemusí dodržovat postupy veřejných zakázek?", "164"),
-    (58, "Co je to jeden podnik?", "156"),
-    (59, "Kdy se začíná předkládat zpráva o realizaci projektu?", "125"),
-    (60, "Jak dlouho může probíhat realizace projektu?", "121")
-]
+# Read the dataframe from CSV file
+csv_file = "opjak_eval_pzp_250.csv"
+print(f"📊 Loading test data from {csv_file}...")
+try:
+    df_test = pd.read_csv(csv_file, sep=';')
+    print(f"✅ Successfully loaded {len(df_test)} rows from CSV")
+except Exception as e:
+    print(f"❌ Error loading CSV file: {e}")
+    exit(1)
 
-df_test = pd.DataFrame(data, columns=["Nr.", "Question", "Pages"])
+# Display sample of the loaded data
+print("\n📝 Sample of loaded data:")
+print(df_test.head())
+
+# Save partial results to handle interruptions
+RESULTS_FILE = "partial_retrieval_results.csv"
+
+def get_embedding(query, max_retries=3):
+    """Generate OpenAI embedding for the query with retry logic."""
+    for attempt in range(max_retries):
+        try:
+            response = openai_client.embeddings.create(
+                model=AZURE_OPENAI_DEPLOYMENT,
+                input=query
+            )
+            return response.data[0].embedding
+        except Exception as e:
+            wait_time = (2 ** attempt) + random.random()
+            print(f" Error generating embedding for '{query}': {e}")
+            print(f" Retrying in {wait_time:.2f} seconds... (Attempt {attempt+1}/{max_retries})")
+            time.sleep(wait_time)
+    
+    print(f" Failed to generate embedding after {max_retries} attempts")
+    return None
 
 
-def get_embedding(query):
-    """Generate OpenAI embedding for the query."""
-    try:
-        response = openai_client.embeddings.create(
-            model=AZURE_OPENAI_DEPLOYMENT,
-            input=query
-        )
-        return response.data[0].embedding
-    except Exception as e:
-        print(f" Error generating embedding for '{query}': {e}")
-        return None
-
-
-def perform_search(query, embedding_vector, top_k):
-    """Perform BM25 and Vector Search with rate limiting."""
+def perform_search(query, embedding_vector, top_k, max_retries=3):
+    """Perform BM25 and Vector Search with retry logic."""
     url = f"https://{SEARCH_SERVICE_NAME}.search.windows.net/indexes/{INDEX_NAME}/docs/search?api-version=2023-11-01"
     headers = {"Content-Type": "application/json", "api-key": SEARCH_API_KEY}
 
-    # BM25 Search
-    bm25_body = {
-        "search": query,
-        "queryType": "simple",
-        "searchFields": "chunk",
-        "select": "chunk_id,parent_id,chunk,title",
-        "top": top_k
-    }
-    bm25_response = requests.post(url, headers=headers, json=bm25_body)
-    bm25_results = bm25_response.json().get("value", []) if bm25_response.status_code == 200 else []
-
- 
-
-    # Vector Search
-    vector_body = {
-        "select": "chunk_id,parent_id,chunk,title",
-        "top": top_k,
-        "vectorQueries": [
-            {
-                "kind": "vector",
-                "vector": embedding_vector,
-                "fields": "vector",
-                "k": top_k
+    # BM25 Search with retries
+    bm25_results = []
+    for attempt in range(max_retries):
+        try:
+            bm25_body = {
+                "search": query,
+                "queryType": "simple",
+                "searchFields": "chunk",
+                "select": "chunk_id,parent_id,chunk,title",
+                "top": top_k
             }
-        ]
-    }
-    vector_response = requests.post(url, headers=headers, json=vector_body)
-    vector_results = vector_response.json().get("value", []) if vector_response.status_code == 200 else []
+            bm25_response = requests.post(url, headers=headers, json=bm25_body, timeout=30)
+            if bm25_response.status_code == 200:
+                bm25_results = bm25_response.json().get("value", [])
+                break
+            else:
+                print(f" Azure BM25 Search Error: {bm25_response.status_code}")
+                time.sleep((2 ** attempt) + random.random())
+        except Exception as e:
+            wait_time = (2 ** attempt) + random.random()
+            print(f" Error in BM25 search: {e}")
+            print(f" Retrying in {wait_time:.2f} seconds... (Attempt {attempt+1}/{max_retries})")
+            time.sleep(wait_time)
 
-    time.sleep(6)  # Ensure rate limiting
+    # Vector Search with retries
+    vector_results = []
+    for attempt in range(max_retries):
+        try:
+            vector_body = {
+                "select": "chunk_id,parent_id,chunk,title",
+                "top": top_k,
+                "vectorQueries": [
+                    {
+                        "kind": "vector",
+                        "vector": embedding_vector,
+                        "fields": "vector",
+                        "k": top_k
+                    }
+                ]
+            }
+            vector_response = requests.post(url, headers=headers, json=vector_body, timeout=30)
+            if vector_response.status_code == 200:
+                vector_results = vector_response.json().get("value", [])
+                break
+            else:
+                print(f" Azure Vector Search Error: {vector_response.status_code}")
+                time.sleep((2 ** attempt) + random.random())
+        except Exception as e:
+            wait_time = (2 ** attempt) + random.random()
+            print(f" Error in vector search: {e}")
+            print(f" Retrying in {wait_time:.2f} seconds... (Attempt {attempt+1}/{max_retries})")
+            time.sleep(wait_time)
+
+    # Add rate limiting with some randomness to avoid synchronized requests
+    time.sleep(6 + random.random())
 
     return bm25_results, vector_results
+
+def rerank_with_cohere(query, documents, top_k=10, max_retries=3):
+    """Rerank documents using Cohere Reranker with retry logic."""
+    for attempt in range(max_retries):
+        try:
+            print(f" Sending request to Cohere Reranker API...")
+            
+            # Use Cohere Multilingual Reranker (supports Czech)
+            rerank_response = cohere_client.rerank(
+                model="rerank-multilingual-v2.0",
+                query=query,
+                documents=documents,
+                top_n=top_k
+            )
+            
+            print(f" Cohere reranking successful - received {len(rerank_response.results)} results")
+            # Add rate limiting with some randomness to avoid synchronized requests
+            time.sleep(6 + random.random())
+            return rerank_response.results
+        except Exception as e:
+            wait_time = (2 ** attempt) + random.random() * 2  # More randomness for connection issues
+            print(f" Error in Cohere reranking: {e}")
+            print(f" Retrying in {wait_time:.2f} seconds... (Attempt {attempt+1}/{max_retries})")
+            time.sleep(wait_time)
+    
+    print(f" Failed to rerank with Cohere after {max_retries} attempts")
+    return []
 
 def reciprocal_rank_fusion(results_bm25, results_vector, k=60):
     """Merges BM25 and Vector Search results using Reciprocal Rank Fusion (RRF)."""
@@ -168,22 +175,58 @@ def extract_page_number(chunk_id):
     match = re.search(r"pages_(\d+)", chunk_id)
     return str(int(match.group(1)) + 1) if match else None
 
+def load_existing_results():
+    """Load existing partial results if available."""
+    try:
+        if os.path.exists(RESULTS_FILE):
+            df = pd.read_csv(RESULTS_FILE)
+            print(f"✅ Loaded {len(df)} existing results from {RESULTS_FILE}")
+            return df
+    except Exception as e:
+        print(f"❌ Error loading existing results: {e}")
+    return pd.DataFrame()
+
 def evaluate_results(df):
-    """Evaluate reranked retrieval performance with API rate limiting."""
-    results = []
+    """Evaluate reranked retrieval performance with API rate limiting and error handling."""
+    
+    # Load existing results to resume from interruptions
+    existing_results_df = load_existing_results()
+    existing_queries = set()
+    if not existing_results_df.empty:
+        existing_queries = set(existing_results_df["Query"].tolist())
+    
+    results = existing_results_df.to_dict('records') if not existing_results_df.empty else []
+    
+    # Start or resume processing
     for index, row in df.iterrows():
         query = row["Question"]
-        expected_pages = row["Pages"].split(", ")
+        
+        # Skip if we've already processed this query
+        if query in existing_queries:
+            print(f"\n🔄 Skipping already processed query: {query}")
+            continue
+            
+        # Convert Pages to string and handle both float and string formats
+        if pd.isna(row["Pages"]):
+            continue  # Skip rows with missing Pages
+            
+        # Convert to string and handle both individual values and comma-separated values
+        page_str = str(row["Pages"]).strip()
+        if "," in page_str:
+            expected_pages = [p.strip() for p in page_str.split(",")]
+        else:
+            # Handle single numerical value (potentially with decimal point)
+            expected_pages = [str(int(float(page_str)))]  # Convert to int then back to str
 
-        print(f"\n🔹 Query: {query}")
+        print(f"\n🔹 Query #{index+1}: {query}")
         print(f"📄 Expected Pages: {expected_pages}")
 
-        # Generate embeddings
+        # Generate embeddings with retry
         embedding_vector = get_embedding(query)
         if embedding_vector is None:
             continue
 
-        # Retrieve documents
+        # Retrieve documents with retry
         bm25_results, vector_results = perform_search(query, embedding_vector, 50)
 
         # Fuse results using RRF
@@ -197,21 +240,34 @@ def evaluate_results(df):
         doc_objects = [doc for doc in doc_objects if doc and doc.get("chunk")]
 
         # Cohere Reranking
-        rerank_response = cohere_client.rerank(
-            model="rerank-multilingual-v2.0",
-            query=query,
-            documents=[doc["chunk"] for doc in doc_objects]
-        )
-
-        time.sleep(6)  # Ensure 10 API calls per minute
-
-        # Extract final reranked documents
-        reranked_results = [doc_objects[result.index] for result in rerank_response.results]
+        if not doc_objects:
+            print(f" No valid documents found for query: {query}")
+            continue
+        
+        # Prepare documents for reranking
+        documents = [doc["chunk"] for doc in doc_objects]
+        
+        # Rerank with Cohere with retry
+        reranked_results = rerank_with_cohere(query, documents, top_k=25)
+        
+        # If reranking failed, use the original results
+        if not reranked_results:
+            print(" Using original fused results without reranking.")
+            # Just use the first 25 fused results
+            reranked_docs = doc_objects[:25]
+        else:
+            # Extract final reranked documents
+            reranked_docs = [doc_objects[result.index] for result in reranked_results 
+                            if 0 <= result.index < len(doc_objects)]
 
         # Extract retrieved pages
-        retrieved_pages_5 = [extract_page_number(doc["chunk_id"]) for doc in reranked_results[:5]]
-        retrieved_pages_10 = [extract_page_number(doc["chunk_id"]) for doc in reranked_results[:10]]
-        retrieved_pages_25 = [extract_page_number(doc["chunk_id"]) for doc in reranked_results[:25]]
+        retrieved_pages_all = [extract_page_number(doc["chunk_id"]) for doc in reranked_docs if doc.get("chunk_id")]
+        retrieved_pages_all = [page for page in retrieved_pages_all if page is not None]
+        
+        # Get different slices for evaluation
+        retrieved_pages_5 = retrieved_pages_all[:5]
+        retrieved_pages_10 = retrieved_pages_all[:10]
+        retrieved_pages_25 = retrieved_pages_all[:25]
 
         print(f"🔍 Retrieved Pages (Top 5): {retrieved_pages_5}")
         print(f"🔍 Retrieved Pages (Top 10): {retrieved_pages_10}")
@@ -222,7 +278,8 @@ def evaluate_results(df):
         match_10 = any(page in retrieved_pages_10 for page in expected_pages)
         match_25 = any(page in retrieved_pages_25 for page in expected_pages)
 
-        results.append({
+        # Store results
+        result_entry = {
             "Query": query,
             "Expected Pages": expected_pages,
             "Retrieved Pages (Top 5)": retrieved_pages_5,
@@ -231,40 +288,52 @@ def evaluate_results(df):
             "Match Found (Top 5)": match_5,
             "Match Found (Top 10)": match_10,
             "Match Found (Top 25)": match_25
-        })
+        }
+        results.append(result_entry)
+
+        # Save partial results after each query to handle interruptions
+        partial_df = pd.DataFrame(results)
+        partial_df.to_csv(RESULTS_FILE, index=False)
+        print(f" Saved partial results ({len(results)} queries processed so far)")
 
     return pd.DataFrame(results)
 
-# Run evaluation with rate limiting
-evaluation_results_multiple_top_k = evaluate_results(df_test)
+# Run evaluation with error handling and resumption
+try:
+    print("\n🚀 Starting evaluation with resilient error handling...")
+    evaluation_results_multiple_top_k = evaluate_results(df_test)
 
-# Save results
-evaluation_results_multiple_top_k.to_csv("reranked_retrieval_evaluation.csv", index=False)
+    # Save final results
+    evaluation_results_multiple_top_k.to_csv("reranked_retrieval_evaluation.csv", index=False)
+    print("\n✅ Reranking evaluation complete. Results saved to reranked_retrieval_evaluation.csv.")
 
-print("\n✅ Reranking evaluation complete. Results saved to reranked_retrieval_evaluation.csv.")
+    # Compute accuracy
+    def compute_accuracy(df, top_k_values=[5, 10, 25]):
+        """Compute accuracy for each top_k value."""
+        accuracy_results = {}
 
+        for top_k in top_k_values:
+            match_column = f"Match Found (Top {top_k})"
+            accuracy = df[match_column].mean()  # Mean gives proportion of True values
+            accuracy_results[f"Accuracy (Top {top_k})"] = accuracy
 
+        return accuracy_results
 
-def compute_accuracy(df, top_k_values=[5, 10, 25]):
-    """Compute accuracy for each top_k value."""
-    accuracy_results = {}
+    # Compute accuracy for each top_k
+    accuracy_scores = compute_accuracy(evaluation_results_multiple_top_k)
 
-    for top_k in top_k_values:
-        match_column = f"Match Found (Top {top_k})"
-        accuracy = df[match_column].mean()  # Mean gives proportion of True values
-        accuracy_results[f"Accuracy (Top {top_k})"] = accuracy
+    # Convert to DataFrame for display and saving
+    df_accuracy = pd.DataFrame([accuracy_scores])
 
-    return accuracy_results
+    # Save accuracy results to CSV
+    df_accuracy.to_csv("hybrid_reranking_accuracy_scores.csv", index=False)
 
-# Compute accuracy for each top_k
-accuracy_scores = compute_accuracy(evaluation_results_multiple_top_k)
+    # Print accuracy results
+    print("\n✅ Accuracy Results:")
+    print(df_accuracy.to_string(index=False))
 
-# Convert to DataFrame for display and saving
-df_accuracy = pd.DataFrame([accuracy_scores])
-
-# Save accuracy results to CSV
-df_accuracy.to_csv("cohere_reranking_accuracy_scores.csv", index=False)
-
-# Print accuracy results
-print("\n✅ Accuracy Results:")
-print(df_accuracy.to_string(index=False))
+except KeyboardInterrupt:
+    print("\n⚠️ Evaluation interrupted by user. Partial results have been saved.")
+except Exception as e:
+    print(f"\n❌ Error during evaluation: {e}")
+    print("⚠️ Partial results have been saved and can be resumed later.")

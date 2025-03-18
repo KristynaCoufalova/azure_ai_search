@@ -1,3 +1,4 @@
+#13_perform_cohere_reranking.py
 import os
 import requests
 import json
@@ -25,7 +26,7 @@ openai_client = AzureOpenAI(
 
 # Define query (Czech)
 dotaz = "Jaké legislativní předpisy Evropské unie se vztahují na veřejnou podporu v rámci OP JAK?"
-pocet_vysledku = 20  # Number of results
+pocet_vysledku = 3  # Number of results
 
 # Generate vector embedding for query using OpenAI
 response = openai_client.embeddings.create(
